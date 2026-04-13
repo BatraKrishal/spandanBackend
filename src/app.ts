@@ -11,11 +11,11 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-// ✅ Allowed origins (dev + prod)
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:8080",
-  process.env.APP_URL
+  process.env.APP_URL,
+  process.env.FRONTEND_URL
 ].filter((origin): origin is string => Boolean(origin));
 app.use(
   cors({

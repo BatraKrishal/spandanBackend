@@ -540,11 +540,11 @@ export async function googleAuthCallbackHandler(req: Request, res: Response) {
       // ignore
     }
 
-    const frontendUrl = process.env.APP_URL || "http://localhost:8080";
+    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || "http://localhost:5173";
     return res.redirect(`${frontendUrl}?google_success=true`);
   } catch (err) {
     console.log(err);
-    const frontendUrl = process.env.APP_URL || "http://localhost:8080";
+    const frontendUrl = process.env.FRONTEND_URL || process.env.APP_URL || "http://localhost:5173";
     return res.redirect(`${frontendUrl}/login?error=google_auth_failed`);
   }
 }
