@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+
 import authRouter from "./routes/auth.routes";
 import userRouter from "./routes/user.routes";
 import adminRouter from "./routes/admin.routes";
@@ -10,19 +11,42 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-app.use(cors({
-  origin: [process.env.APP_URL || "http://localhost:5173", "http://localhost:8080"],
+// ✅ Allowed origins (dev + prod)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:8080",
+  process.env.APP_URL
+].filter((origin): origin is string => Boolean(origin));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true
+  })
+);
+
+// ✅ Handle preflight requests (IMPORTANT for auth/refresh)
+app.options("*", cors({
+  origin: allowedOrigins,
   credentials: true
 }));
 
 app.use(express.json());
-
 app.use(cookieParser());
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+// routes
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/admin", adminRouter);
