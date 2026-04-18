@@ -322,7 +322,14 @@ export async function refreshHandler(req: Request, res: Response) {
 }
 
 export async function logoutHandler(_req: Request, res: Response) {
-  res.clearCookie("refreshToken", { path: "/" });
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("refreshToken", {
+    path: "/",
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+  });
 
   return res.status(200).json({
     message: "Logged out",
@@ -494,16 +501,21 @@ export async function googleAuthCallbackHandler(req: Request, res: Response) {
 
       user = await User.create({
         email: normalizedEmail,
+        name: payload?.name || payload?.given_name || "",
         passwordHash,
         role: "user",
         isEmailVerified: true,
         twoFactorEnabled: false,
       });
     } else {
+      // Backfill name if missing (e.g. user registered before Google auth)
       if (!user.isEmailVerified) {
         user.isEmailVerified = true;
-        await user.save();
       }
+      if (!user.name && (payload?.name || payload?.given_name)) {
+        user.name = payload?.name || payload?.given_name || "";
+      }
+      await user.save();
     }
 
     const accessToken = createAccessToken(
