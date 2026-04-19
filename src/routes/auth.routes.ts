@@ -3,6 +3,7 @@ import {
   forgotPasswordHandler,
   googleAuthCallbackHandler,
   googleAuthStartHandler,
+  exchangeCodeHandler,
   loginHandler,
   logoutHandler,
   refreshHandler,
@@ -25,6 +26,7 @@ router.post("/forgot-password", forgotPasswordHandler);
 router.post("/reset-password", resetPasswordHandler);
 router.get("/google", googleAuthStartHandler);
 router.get("/google/callback", googleAuthCallbackHandler);
+router.post("/exchange-code", exchangeCodeHandler);
 router.post("/2fa/setup", requireAuth, twoFASetuphandler);
 router.post("/2fa/verify", requireAuth, twoFAVerifyHandler);
 
