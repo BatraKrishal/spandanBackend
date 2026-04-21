@@ -1,14 +1,39 @@
 import { Schema, model, Types } from "mongoose";
 
+export interface ITeamMember {
+  name: string;
+  college: string;
+  otherCollege?: string;
+  branch: string;
+  otherBranch?: string;
+  year: string;
+}
+
 export interface IParticipant {
   userId: Types.ObjectId;
+  email: string;
   name: string;
+  college: string;
+  otherCollege?: string;
   branch: string;
+  otherBranch?: string;
   year: string;
   event: string;
-  teamMembers?: string;
   teamLeader?: string;
+  teamMembers?: ITeamMember[];
 }
+
+const teamMemberSchema = new Schema<ITeamMember>(
+  {
+    name: { type: String, required: true, trim: true },
+    college: { type: String, required: true, trim: true },
+    otherCollege: { type: String, trim: true },
+    branch: { type: String, required: true, trim: true },
+    otherBranch: { type: String, trim: true },
+    year: { type: String, required: true },
+  },
+  { _id: false }
+);
 
 const participantSchema = new Schema<IParticipant>(
   {
@@ -17,14 +42,33 @@ const participantSchema = new Schema<IParticipant>(
       ref: "User",
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     name: {
       type: String,
       required: true,
       trim: true,
     },
+    college: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    otherCollege: {
+      type: String,
+      trim: true,
+    },
     branch: {
       type: String,
       required: true,
+      trim: true,
+    },
+    otherBranch: {
+      type: String,
       trim: true,
     },
     year: {
@@ -35,13 +79,13 @@ const participantSchema = new Schema<IParticipant>(
       type: String,
       required: true,
     },
-    teamMembers: {
-      type: String,
-      trim: true,
-    },
     teamLeader: {
       type: String,
       trim: true,
+    },
+    teamMembers: {
+      type: [teamMemberSchema],
+      default: [],
     },
   },
   {
