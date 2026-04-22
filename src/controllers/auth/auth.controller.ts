@@ -12,6 +12,7 @@ import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import { storeOAuthCode, consumeOAuthCode } from "../../lib/oauthCodes";
 import { authenticator } from "otplib";
+import jwt from "jsonwebtoken";
 
 function getAppUrl() {
   return process.env.APP_URL || `http://localhost:${process.env.PORT}`;
