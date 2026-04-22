@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { loginSchema, registerSchema } from "./auth.schema";
 import { User } from "../../models/user.model";
 import { checkPassword, hashPassword } from "../../lib/hash";
-import jwt from "jsonwebtoken";
 import { sendEmail } from "../../lib/email";
 import {
   createAccessToken,
@@ -63,42 +62,10 @@ export async function registerHandler(req: Request, res: Response) {
       email: normalizedEmail,
       passwordHash,
       role: "user",
-      isEmailVerified: false,
+      isEmailVerified: true, // auto-verified — no email verification required
       twoFactorEnabled: false,
       name,
     });
-
-    // email verification part
-
-    if (process.env.NODE_ENV === "production") {
-      const verifyToken = jwt.sign(
-        {
-          sub: newlyCreatedUser.id,
-        },
-        process.env.JWT_ACCESS_SECRET!,
-        {
-          expiresIn: "1d",
-        }
-      );
-
-      const verifyUrl = `${getAppUrl()}/auth/verify-email?token=${verifyToken}`;
-
-      try {
-        await sendEmail(
-          newlyCreatedUser.email,
-          "Verify your email",
-          `<p>please verify your emal by clicking this link:</p>
-          <p><a href="${verifyUrl}">${verifyUrl}</a></p>
-          `
-        );
-      } catch (emailErr) {
-        console.error("Failed to send verification email:", emailErr);
-      }
-    } else {
-      // Auto verify for development
-      newlyCreatedUser.isEmailVerified = true;
-      await newlyCreatedUser.save();
-    }
 
     return res.status(201).json({
       message: "User registered",
@@ -178,11 +145,7 @@ export async function loginHandler(req: Request, res: Response) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    if (!user.isEmailVerified && process.env.NODE_ENV === "production") {
-      return res
-        .status(403)
-        .json({ message: "Please verify your email before logging in..." });
-    }
+    // Email verification is bypassed — all users can log in immediately
 
     if (user.twoFactorEnabled) {
       if (!twoFactorCode || typeof twoFactorCode !== "string") {
