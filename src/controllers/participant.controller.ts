@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Participant } from "../models/participant.model";
 import { User } from "../models/user.model";
+import { appendRegistrationToSheet } from "../lib/googleSheets";
 
 export const registerParticipant = async (req: Request, res: Response) => {
   try {
@@ -62,6 +63,9 @@ export const registerParticipant = async (req: Request, res: Response) => {
     });
 
     await newParticipant.save();
+
+    // Asynchronously send to Google Sheets so we don't delay the response
+    appendRegistrationToSheet(event, newParticipant);
 
     return res.status(201).json({
       success: true,

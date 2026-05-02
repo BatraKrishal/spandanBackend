@@ -192,22 +192,7 @@ export async function loginHandler(req: Request, res: Response) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Send welcome/login email
-    try {
-      sendEmail(
-        user.email,
-        "Welcome to Spandan - New Login Detected",
-        `<div style="font-family: sans-serif; p-4;">
-          <h2>Welcome back to Spandan, ${user.name || 'User'}!</h2>
-          <p>We just noticed a new login to your account. If this was you, you can safely ignore this email.</p>
-          <p>Get ready for an amazing experience with the pulse of neon!</p>
-          <br />
-          <p>Best,<br/>The Spandan Team</p>
-        </div>`
-      ).catch(e => console.error("Could not send login email", e));
-    } catch(err) {
-      // ignore
-    }
+
 
     return res.status(200).json({
       message: "Login successfully done",
@@ -481,18 +466,7 @@ export async function googleAuthCallbackHandler(req: Request, res: Response) {
       await user.save();
     }
 
-    // Send welcome/login email (fire-and-forget)
-    sendEmail(
-      user.email,
-      "Welcome to Spandan - Access Granted",
-      `<div style="font-family: sans-serif; padding: 16px;">
-        <h2>Welcome to Spandan, ${user.name || "User"}!</h2>
-        <p>You have successfully logged in using your Google Account.</p>
-        <p>Get ready for an amazing experience with the pulse of neon!</p>
-        <br />
-        <p>Best,<br/>The Spandan Team</p>
-      </div>`
-    ).catch((e) => console.error("Could not send google login email", e));
+
 
     // Generate a short-lived one-time code instead of setting a cookie here.
     // Cookies set during a cross-site redirect chain are blocked by Brave and
